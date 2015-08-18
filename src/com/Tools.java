@@ -1,12 +1,16 @@
 package com;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class Tools {
@@ -152,6 +156,7 @@ public class Tools {
 
 	private static List<File> listFile(List<File> lstFileNames, File f, String suffix, boolean isdepth) {
 		// 若是目录, 采用递归的方法遍历子目录
+		HashSet<String> ignores = Tools.getCompressedPNGName();
 		if (f.isDirectory()) {
 			File[] t = f.listFiles();
 
@@ -171,7 +176,7 @@ public class Tools {
 					if (tempsuffix.equals(suffix)) {
 						try {
 							// BufferedImage image = ImageIO.read(f);
-							if (isSelected(f.length())) {
+							if (isSelected(f.length())&&!ignores.contains(f.getName())) {
 								lstFileNames.add(f);
 							}
 						} catch (Exception e) {
@@ -191,10 +196,36 @@ public class Tools {
 		return l > SIZE_LIMIT && l <= MAX_LIMIT;
 	}
 	
-	static int m = 20000; // smaller than m KB
+	static int m = 20; // smaller than m KB
 	private static final int MAX_LIMIT = 1024 * m; 												// root
-	static int n = 20; // bigger than n KB
+	static int n = 10; // bigger than n KB
 	private static final int SIZE_LIMIT = 1024 * n; // image larger than 10K
-
+	
+	
+	public static HashSet<String> getCompressedPNGName(){
+		HashSet<String> name = new HashSet<>();
+		File  f = new File("./compressedPNG");
+		try {
+			FileReader fr = new FileReader(f);
+			BufferedReader br = new BufferedReader(fr);
+			String line;
+			while((line = br.readLine())!=null){
+//				System.out.println(line);
+				String path = line.split(" size:")[0];
+				String[] tmp = path.split("/");
+				String filename = tmp[tmp.length-1];
+//				map.put(filename, path);
+				name.add(filename);
+//				System.out.println(filename);
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return name;
+	}
 
 }
